@@ -160,7 +160,7 @@ void consultar()
   {
     if ((cod == produtos.codigo) && (produtos.deletado != '*'))
     {
-      printf("Cod %d --- Descricao: %-8s --- Valor R$ %4.2f\\n", produtos.codigo, produtos.descricao, produtos.valor);
+      printf("Cod %d --- Descricao: %-8s --- Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
       achei = 1;
     }
   }
