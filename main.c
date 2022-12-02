@@ -1,20 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Registro / Tipo de Variavel
 struct tProduto
 {
   int codigo;
   char descricao[10];
   float valor;
-  char deletado; // deletado = '*' / nao deletado = ' ' - exclusao logica
+  char deletado;
 };
 
-// Prototipos
 int menu();
 void inclusao();
 void listar();
-void consultar();
+void buscar();
 void alterar();
 void excluir();
 void organizar();
@@ -23,6 +21,7 @@ void copiar();
 int main(void)
 {
   int op;
+
   do
   {
     op = menu();
@@ -30,7 +29,7 @@ int main(void)
     {
 
     case 1:
-      printf("Incluir\n");
+      printf("\nIncluir\n");
       inclusao();
       break;
 
@@ -40,8 +39,8 @@ int main(void)
       break;
 
     case 3:
-      printf("Consultar\n");
-      consultar();
+      printf("Buscar\n");
+      buscar();
       break;
 
     case 4:
@@ -53,59 +52,39 @@ int main(void)
       printf("Excluir\n");
       excluir();
       break;
-
-    case 6:
-      printf("Organizar Arquiv\n"); // funciona como uma exclusao fisica
-      organizar();
-      break;
-
-    case 7:
-      printf("Backup\n");
-      copiar();
-      break;
-
-    case 8:
-      printf("Restore\n");
-      copiar();
     }
   } while (op != 0);
 
-  // system("pause");
   return 0;
 }
 
-// Menu de Opcoes
 int menu(void)
 {
 
   int opcao;
   do
   {
-    printf("MENU PARA CADASTRO DE PRODUTOS\n");
+    printf("\nMENU PARA CADASTRO DE PRODUTOS\n");
     printf("1. Incluir\n");
     printf("2. Listar\n");
-    printf("3. Consultar\n");
+    printf("3. Buscar\n");
     printf("4. Alterar\n");
     printf("5. Excluir\n");
-    printf("6. Organizar Arquivo\n");
-    printf("7. Backup\n");
-    printf("8. Restore\n");
     printf("0. Sair\n\n");
     printf("Digite sua opcao: ");
     scanf("%d", &opcao);
-    if ((opcao < 0) || (opcao > 8))
-      printf("Opcao digitada incorreta!\n");
-  } while ((opcao < 0) || (opcao > 8));
+    if ((opcao < 0) || (opcao > 5))
+      printf("Opcao selecionada incorreta!\n");
+  } while ((opcao < 0) || (opcao > 5));
 
   return opcao;
 }
 
-// Funcao Inclusao
 void inclusao()
 {
   struct tProduto produtos;
 
-  FILE *arq = fopen("produtos.pro", "ab");
+  FILE *arq = fopen("produtos.txt", "ab");
   if (arq == NULL)
   {
     printf("Erro ao abrir arquivo");
@@ -122,29 +101,27 @@ void inclusao()
   fclose(arq);
 }
 
-// Funcao Listar
 void listar()
 {
 
   struct tProduto produtos;
-  FILE *arq = fopen("produtos.pro", "rb");
+  FILE *arq = fopen("produtos.txt", "rb");
   if (arq == NULL)
   {
-    printf("Arquivo inexistente!");
+    printf("Arquivo inexistente ou vazio!");
     return;
   }
 
   while (fread(&produtos, sizeof(produtos), 1, arq))
-    printf("Cod %d --- Descricao: %-8s --- Valor R$ %4.2f --- Deletado?(%c)\n", produtos.codigo, produtos.descricao, produtos.valor, produtos.deletado);
+    printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f - Deletado?(%c)\n", produtos.codigo, produtos.descricao, produtos.valor, produtos.deletado);
 
   fclose(arq);
 }
 
-// Funcao Consultar
-void consultar()
+void buscar()
 {
 
-  FILE *arq = fopen("produtos.pro", "rb");
+  FILE *arq = fopen("produtos.txt", "rb");
   if (arq == NULL)
   {
     printf("Arquivo inexistente!");
@@ -160,7 +137,7 @@ void consultar()
   {
     if ((cod == produtos.codigo) && (produtos.deletado != '*'))
     {
-      printf("Cod %d --- Descricao: %-8s --- Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
+      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
       achei = 1;
     }
   }
@@ -171,10 +148,9 @@ void consultar()
   fclose(arq);
 }
 
-// Funcao Alterar
 void alterar()
 {
-  FILE *arq = fopen("produtos.pro", "r+b");
+  FILE *arq = fopen("produtos.txt", "r+b");
   if (arq == NULL)
   {
     printf("Arquivo inexistente!");
@@ -190,7 +166,7 @@ void alterar()
   {
     if (cod == produtos.codigo)
     {
-      printf("Cod %d --- Descricao: %-8s --- Valor R$ %4.2f\n\n", produtos.codigo, produtos.descricao, produtos.valor);
+      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
       achei = 1;
 
       fseek(arq, sizeof(struct tProduto) * -1, SEEK_CUR);
@@ -212,11 +188,10 @@ void alterar()
   fclose(arq);
 }
 
-// Exclusao Logica
 void excluir()
 {
 
-  FILE *arq = fopen("produtos.pro", "r+b");
+  FILE *arq = fopen("produtos.txt", "r+b");
   if (arq == NULL)
   {
     printf("Arquivo inexistente!");
@@ -233,7 +208,7 @@ void excluir()
   {
     if (cod == produtos.codigo)
     {
-      printf("Cod %d --- Descricao: %-8s --- Valor R$ %4.2f\n\n", produtos.codigo, produtos.descricao, produtos.valor);
+      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
       achei = 1;
 
       printf("\nTem certeza que quer excluir este produto? s/n \n");
@@ -257,56 +232,4 @@ void excluir()
     printf("\nCodigo nao cadastrado!!\n");
 
   fclose(arq);
-}
-
-// Organizar Arquivo
-void organizar()
-{
-  struct tProduto produtos;
-  struct tProduto produtosB; // arquivo de backup
-
-  FILE *arq = fopen("produtos.pro", "rb");
-  if (arq == NULL)
-  {
-    printf("Arquivo inexistente!");
-    return;
-  }
-
-  FILE *arqB = fopen("BackupProdutos.pro", "wb");
-  if (arqB == NULL)
-  {
-    printf("Erro na abertura!");
-    return;
-  }
-
-  while (fread(&produtos, sizeof(produtos), 1, arq))
-  {
-    if (produtos.deletado != '*')
-    {
-
-      fseek(arqB, sizeof(produtos) * -1, SEEK_CUR);
-      fwrite(&produtos, sizeof(produtos), 1, arqB);
-      fseek(arqB, sizeof(produtos) * 0, SEEK_END);
-    }
-  }
-
-  fclose(arq);
-  fclose(arqB);
-
-  remove("produtos.pro");
-  int teste = 0;
-  teste = rename("BackupProdutos.pro", "produtos.pro");
-  if (teste == 0)
-  {
-    printf("\nArquivo Renomeado com Sucesso! \n");
-    printf("\nArquivo organizado com Sucesso! %d \n", teste);
-  }
-  else
-    printf("\nErro ao Renomear! %d \n", teste);
-  return;
-}
-
-// Backup e Restore
-void copiar()
-{
 }
