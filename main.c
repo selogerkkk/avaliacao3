@@ -4,13 +4,13 @@
 struct tProduto
 {
   int codigo;
-  char descricao[10];
+  char nome[10];
   float valor;
   char deletado;
 };
 
 int menu();
-void inclusao();
+void adicionar();
 void listar();
 void buscar();
 void alterar();
@@ -29,8 +29,8 @@ int main(void)
     {
 
     case 1:
-      printf("\nIncluir\n");
-      inclusao();
+      printf("\nAdicionar\n");
+      adicionar();
       break;
 
     case 2:
@@ -52,6 +52,11 @@ int main(void)
       printf("Excluir\n");
       excluir();
       break;
+
+    case 6:
+      printf("Organizar\n");
+      organizar();
+      break;
     }
   } while (op != 0);
 
@@ -65,22 +70,23 @@ int menu(void)
   do
   {
     printf("\nMENU PARA CADASTRO DE PRODUTOS\n");
-    printf("1. Incluir\n");
+    printf("1. Adicionar\n");
     printf("2. Listar\n");
     printf("3. Buscar\n");
     printf("4. Alterar\n");
     printf("5. Excluir\n");
+    printf("6. Organizar\n");
     printf("0. Sair\n\n");
     printf("Digite sua opcao: ");
     scanf("%d", &opcao);
-    if ((opcao < 0) || (opcao > 5))
+    if ((opcao < 0) || (opcao > 6))
       printf("Opcao selecionada incorreta!\n");
-  } while ((opcao < 0) || (opcao > 5));
+  } while ((opcao < 0) || (opcao > 6));
 
   return opcao;
 }
 
-void inclusao()
+void adicionar()
 {
   struct tProduto produtos;
 
@@ -92,9 +98,9 @@ void inclusao()
   }
   printf("Digite o codigo do produto: \n");
   scanf("%d", &produtos.codigo);
-  printf("Digite a descricao do produto: \n");
+  printf("Digite o nome do produto: \n");
   fflush(stdin);
-  gets(produtos.descricao);
+  gets(produtos.nome);
   printf("Digite o valor do produto: \n");
   scanf("%f", &produtos.valor);
   fwrite(&produtos, sizeof(produtos), 1, arq);
@@ -108,12 +114,12 @@ void listar()
   FILE *arq = fopen("produtos.txt", "rb");
   if (arq == NULL)
   {
-    printf("Arquivo inexistente ou vazio!");
+    printf("Arquivo nao existe ou está vazio.");
     return;
   }
 
   while (fread(&produtos, sizeof(produtos), 1, arq))
-    printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f - Deletado?(%c)\n", produtos.codigo, produtos.descricao, produtos.valor, produtos.deletado);
+    printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f - Deletado?(%c)\n", produtos.codigo, produtos.nome, produtos.valor, produtos.deletado);
 
   fclose(arq);
 }
@@ -124,12 +130,12 @@ void buscar()
   FILE *arq = fopen("produtos.txt", "rb");
   if (arq == NULL)
   {
-    printf("Arquivo inexistente!");
+    printf("Arquivo nao existe ou está vazio.");
     return;
   }
 
   struct tProduto produtos;
-  int cod, achei = 0;
+  int cod, encontrado = 0;
   printf("\nDigite o codigo que procura: \n");
   scanf("%d", &cod);
 
@@ -137,12 +143,12 @@ void buscar()
   {
     if ((cod == produtos.codigo) && (produtos.deletado != '*'))
     {
-      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
-      achei = 1;
+      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.nome, produtos.valor);
+      encontrado = 1;
     }
   }
 
-  if (!achei)
+  if (!encontrado)
     printf("\nCodigo nao cadastrado!!\n");
 
   fclose(arq);
@@ -153,12 +159,12 @@ void alterar()
   FILE *arq = fopen("produtos.txt", "r+b");
   if (arq == NULL)
   {
-    printf("Arquivo inexistente!");
+    printf("Arquivo nao existe ou está vazio.");
     return;
   }
 
   struct tProduto produtos;
-  int cod, achei = 0;
+  int cod, encontrado = 0;
   printf("\nDigite o codigo que deseja alterar: \n");
   scanf("%d", &cod);
 
@@ -166,14 +172,14 @@ void alterar()
   {
     if (cod == produtos.codigo)
     {
-      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
-      achei = 1;
+      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.nome, produtos.valor);
+      encontrado = 1;
 
       fseek(arq, sizeof(struct tProduto) * -1, SEEK_CUR);
-      printf("\nDigite a nova descricao: \n");
+      printf("\nDigite o novo nome: \n");
       fflush(stdin);
-      gets(produtos.descricao);
-      printf("\nDigite o novo preco....: \n");
+      gets(produtos.nome);
+      printf("\nDigite o novo preco: \n");
       scanf("%f", &produtos.valor);
 
       fwrite(&produtos, sizeof(produtos), 1, arq);
@@ -182,8 +188,8 @@ void alterar()
     }
   }
 
-  if (!achei)
-    printf("\nCodigo nao cadastrado!!\n");
+  if (!encontrado)
+    printf("\nCodigo do produto nao cadastrado.\n");
 
   fclose(arq);
 }
@@ -194,12 +200,12 @@ void excluir()
   FILE *arq = fopen("produtos.txt", "r+b");
   if (arq == NULL)
   {
-    printf("Arquivo inexistente!");
+    printf("Arquivo nao existe ou está vazio.");
     return;
   }
 
   struct tProduto produtos;
-  int cod, achei = 0;
+  int cod, encontrado = 0;
   char certeza;
   printf("\nDigite o codigo que deseja EXCLUIR: \n");
   scanf("%d", &cod);
@@ -208,8 +214,8 @@ void excluir()
   {
     if (cod == produtos.codigo)
     {
-      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.descricao, produtos.valor);
-      achei = 1;
+      printf("Cod. %d - Produto: %-8s - Valor R$ %4.2f\n", produtos.codigo, produtos.nome, produtos.valor);
+      encontrado = 1;
 
       printf("\nTem certeza que quer excluir este produto? s/n \n");
       fflush(stdin);
@@ -228,8 +234,52 @@ void excluir()
     }
   }
 
-  if (!achei)
+  if (!encontrado)
     printf("\nCodigo nao cadastrado!!\n");
 
   fclose(arq);
+}
+
+void organizar()
+{
+  struct tProduto produtos;
+  FILE *arq = fopen("produtos.txt", "rb");
+  if (arq == NULL)
+  {
+    printf("Arquivo nao existe!");
+    return;
+  }
+
+  FILE *arqB = fopen("backupProdutos.txt", "wb");
+  if (arqB == NULL)
+  {
+    printf("Erro ao abrir arquivo.");
+    return;
+  }
+
+  while (fread(&produtos, sizeof(produtos), 1, arq))
+  {
+    if (produtos.deletado != '*')
+    {
+
+      fseek(arqB, sizeof(produtos) * -1, SEEK_CUR);
+      fwrite(&produtos, sizeof(produtos), 1, arqB);
+      fseek(arqB, sizeof(produtos) * 0, SEEK_END);
+    }
+  }
+
+  fclose(arq);
+  fclose(arqB);
+
+  remove("produtos.txt");
+  int teste = 0;
+  teste = rename("backupProdutos.txt", "produtos.txt");
+  if (teste == 0)
+  {
+    printf("\nArquivo renomeado.\n");
+    printf("\nArquivo organizado. %d \n", teste);
+  }
+  else
+    printf("\nErro ao renomear arquivo. %d \n", teste);
+  return;
 }
